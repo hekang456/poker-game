@@ -1,12 +1,13 @@
 // ♠ spade（黑桃，又名葵扇）、♥ heart（红心，又名红桃）、♣ club（梅花，又名草花）、♦ diamond（方块，又名阶砖）
 import { shuffle } from 'lodash-es';
+import { Suit } from './type';
 
-const suits = ['spade', 'heart', 'club', 'diamond'];
+const suits: Suit[] = ['spade', 'heart', 'club', 'diamond'];
 const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 class Pokers {
-	pokers: { suit: string; value: number }[] = [];
-	constructor(public suits: string[], public values: number[]) {
+	pokers: { suit: Suit; value: number }[] = [];
+	constructor(public suits: Suit[], public values: number[]) {
 		this.generatePokers();
 		this.shuffle();
 	}
