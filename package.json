@@ -11,10 +11,11 @@
 	"dependencies": {
 		"ant-design-vue": "4.x",
 		"lodash-es": "^4.17.21",
-		"normalize": "^0.3.1",
+		"normalize.css": "^8.0.1",
 		"vue": "^3.3.4"
 	},
 	"devDependencies": {
+		"@types/lodash-es": "^4.17.9",
 		"@vitejs/plugin-vue": "^4.2.3",
 		"typescript": "^5.0.2",
 		"vite": "^4.4.5",
