@@ -11,6 +11,7 @@
 				class="game-row"
 				v-for="(element, indexR) in col"
 				:key="indexR"
+				:class="{ 'choose-element': element.id === toBeMatchedCards?.[0]?.id }"
 				@click="overturnOrChoose(element)"
 				:draggable="element.visible"
 				@dragstart="onDragstart($event, element)"
@@ -69,7 +70,7 @@ const initData = () => {
 			row++
 		) {
 			curCol.push({
-				id: new Date().getTime(),
+				id: index,
 				suit: poker.pokers[index].suit,
 				value: poker.pokers[index].value,
 				row,
@@ -161,7 +162,7 @@ const onColDragover = (_event: DragEvent, indexCol: number) => {
 	}
 };
 
-let toBeMatchedCards: Poker[] = [];
+let toBeMatchedCards = ref<Poker[]>([]);
 
 const overturnOrChoose = (element: Poker) => {
 	const { col, row } = element;
@@ -182,13 +183,13 @@ const overturnOrChoose = (element: Poker) => {
 		}
 	} else {
 		// 翻起来的牌就是要移动
-		if (toBeMatchedCards.length === 0) {
-			message.info('已选择要移动的牌，请选择要移动的位置');
-			toBeMatchedCards.push(element);
-		} else if (toBeMatchedCards.length === 1) {
-			toBeMatchedCards.push(element);
-			checkIfMatch(toBeMatchedCards[0], toBeMatchedCards[1]);
-			toBeMatchedCards = [];
+		if (toBeMatchedCards.value.length === 0) {
+			// message.info('已选择要移动的牌，请选择要移动的位置');
+			toBeMatchedCards.value.push(element);
+		} else if (toBeMatchedCards.value.length === 1) {
+			toBeMatchedCards.value.push(element);
+			checkIfMatch(toBeMatchedCards.value[0], toBeMatchedCards.value[1]);
+			toBeMatchedCards.value = [];
 		}
 	}
 };
@@ -336,11 +337,15 @@ defineExpose({
 		display: inline-flex;
 		flex-direction: column;
 		margin-right: 40px;
-		min-height: 600px;
 
 		.game-row {
 			margin-top: -120px;
 			border-radius: 4px;
+		}
+
+		.choose-element {
+			border: 4px solid green;
+			padding: -8px;
 		}
 	}
 }

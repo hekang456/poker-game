@@ -25,6 +25,8 @@ class Pokers {
 
 	shuffle() {
 		this.pokers = shuffle(this.pokers);
+		this.pokers = shuffle(this.pokers);
+		this.pokers = shuffle(this.pokers);
 	}
 
 	reset() {
