@@ -11,7 +11,7 @@
 				class="game-row"
 				v-for="(element, indexR) in col"
 				:key="indexR"
-				@click="overturn(element)"
+				@click="overturnOrChoose(element)"
 				:draggable="element.visible"
 				@dragstart="onDragstart($event, element)"
 				@dragover="onDragover($event, element, indexC)"
@@ -45,8 +45,6 @@ import { cloneDeep } from 'lodash-es';
 const DEFAULT_UNVISIBLE_ROWS = 2;
 const DEFAULT_COLS = 8;
 
-const data = poker.pokers;
-
 // 保存的是第1列、第2列。。。
 const viewPokersData = ref<Poker[][]>([]);
 
@@ -72,8 +70,8 @@ const initData = () => {
 		) {
 			curCol.push({
 				id: new Date().getTime(),
-				suit: data[index].suit,
-				value: data[index].value,
+				suit: poker.pokers[index].suit,
+				value: poker.pokers[index].value,
 				row,
 				col,
 				visible: row < 2 ? false : true
@@ -84,6 +82,7 @@ const initData = () => {
 	}
 
 	viewPokersData.value = res;
+	window.localStorage.setItem('__poker_game_history', JSON.stringify(null));
 };
 
 initData();
@@ -93,23 +92,27 @@ const onDragstart = async (_event: DragEvent, element: Poker) => {
 	const { col, row } = element;
 	restCols.value = viewPokersData.value[col!].slice(row!);
 
-	// const gameCol = document.createElement('div');
-	// gameCol.className = 'game-col';
+	// const canvas = document.createElement('canvas');
+
+	// const ctx = canvas.getContext('2d');
 
 	// restCols.value.forEach((item) => {
-	// 	const gameRow = document.createElement('div');
-	// 	gameRow.className = 'game-row';
-	// 	const image = document.createElement('img');
-	// 	image.src = getAssetsFile(item.suit + item.value);
-	// 	image.width = 120;
-	// 	gameRow.appendChild(image);
-	// 	gameCol.appendChild(gameRow);
+	// const img = new Image(); // 创建一个<img>元素
+	// img.onload = function () {
+	// 	ctx!.drawImage(img, 0, 65, 120, 185); //绘制图片
+	// };
+	// img.src = getAssetsFile(item.suit + item.value); // 设置图片源地址
+	// 	ctx?.fillRect(0, 0, 20, 20);
 	// });
 
-	// event.dataTransfer?.setDragImage(gameCol, 0, 0);
+	// _event.dataTransfer?.setDragImage(canvas, 0, 0);
 };
 
-const onDrop = (_event: DragEvent, indexCol: number) => {
+const onDrop = (_event: DragEvent | undefined, indexCol: number) => {
+	checkPokerIsMatched(indexCol);
+};
+
+const checkPokerIsMatched = (indexCol: number) => {
 	const {
 		row: startRow,
 		col: startCol,
@@ -117,27 +120,21 @@ const onDrop = (_event: DragEvent, indexCol: number) => {
 		value: startValue
 	} = restCols.value[0];
 
-	if (viewPokersData.value[indexCol].length > 0) {
-		const lastPoker =
-			viewPokersData.value[indexCol][viewPokersData.value[indexCol].length - 1];
+	const curColLength = viewPokersData.value[indexCol].length;
+	if (curColLength > 0) {
+		const lastPoker = viewPokersData.value[indexCol][curColLength - 1];
 		const { suit: endSuit, value: endValue } = lastPoker;
 
 		if (startSuit === endSuit && startValue + 1 === endValue) {
 			viewPokersData.value[startCol!].splice(startRow!);
-			viewPokersData.value[indexCol].splice(
-				viewPokersData.value[indexCol].length,
-				0,
-				...restCols.value
-			);
+			viewPokersData.value[indexCol].splice(curColLength, 0, ...restCols.value);
 			rearrange();
+		} else {
+			message.error('无法配对');
 		}
 	} else {
 		viewPokersData.value[startCol!].splice(startRow!);
-		viewPokersData.value[indexCol].splice(
-			viewPokersData.value[indexCol].length,
-			0,
-			...restCols.value
-		);
+		viewPokersData.value[indexCol].splice(curColLength, 0, ...restCols.value);
 		rearrange();
 	}
 };
@@ -145,12 +142,13 @@ const onDrop = (_event: DragEvent, indexCol: number) => {
 const onDragover = (_event: DragEvent, element: Poker, indexCol: number) => {
 	const { suit: startSuit, value: startValue } = restCols.value[0];
 
-	const lastPoker =
-		viewPokersData.value[indexCol][viewPokersData.value[indexCol].length - 1];
+	const curColLength = viewPokersData.value[indexCol].length;
+
+	const lastPoker = viewPokersData.value[indexCol][curColLength - 1];
 	const { suit: endSuit, value: endValue } = lastPoker;
 
 	if (startSuit === endSuit && startValue + 1 === endValue) {
-		if (element.row === viewPokersData.value[indexCol].length - 1) {
+		if (element.row === curColLength - 1) {
 			_event.preventDefault();
 		}
 	}
@@ -163,26 +161,42 @@ const onColDragover = (_event: DragEvent, indexCol: number) => {
 	}
 };
 
-const overturn = (element: Poker) => {
+let toBeMatchedCards: Poker[] = [];
+
+const overturnOrChoose = (element: Poker) => {
 	const { col, row } = element;
 
-	if (
-		viewPokersData.value[col!].length === row! + 1 &&
-		element.visible === false
-	) {
-		element.visible = true;
-	}
+	// 扣着的牌需要翻起来
+	if (element.visible === false) {
+		if (viewPokersData.value[col!].length === row! + 1) {
+			element.visible = true;
+		}
 
-	// 如果透视功能开启，那也可以翻牌
-	if (perspective.value) {
-		if (element.visible === false) {
+		// 如果透视功能开启，那也可以翻牌
+		if (perspective.value) {
 			element.visible = true;
 
 			setTimeout(() => {
 				element.visible = false;
 			}, 1500);
 		}
+	} else {
+		// 翻起来的牌就是要移动
+		if (toBeMatchedCards.length === 0) {
+			message.info('已选择要移动的牌，请选择要移动的位置');
+			toBeMatchedCards.push(element);
+		} else if (toBeMatchedCards.length === 1) {
+			toBeMatchedCards.push(element);
+			checkIfMatch(toBeMatchedCards[0], toBeMatchedCards[1]);
+			toBeMatchedCards = [];
+		}
 	}
+};
+
+const checkIfMatch = (startEle: Poker, endEle: Poker) => {
+	const { col, row } = startEle;
+	restCols.value = viewPokersData.value[col!].slice(row!);
+	checkPokerIsMatched(endEle.col!);
 };
 
 // 透视
@@ -218,8 +232,17 @@ const onPerspective = () => {
 const onHint = () => {
 	let flag = false;
 	work: for (let i = 0; i < DEFAULT_COLS; i++) {
-		const lastEle = viewPokersData.value[i][viewPokersData.value[i].length - 1];
-		const { suit: lastSuit, value: lastValue, col: lastCol } = lastEle;
+		const lastColLength = viewPokersData.value[i].length;
+		if (lastColLength === 0) continue;
+		const lastEle = viewPokersData.value[i][lastColLength - 1];
+		const {
+			suit: lastSuit,
+			value: lastValue,
+			col: lastCol,
+			visible: lastVisible
+		} = lastEle;
+
+		if (!lastVisible) continue;
 
 		for (let col = 0; col < viewPokersData.value.length; col++) {
 			const colData = viewPokersData.value[col];
@@ -313,6 +336,7 @@ defineExpose({
 		display: inline-flex;
 		flex-direction: column;
 		margin-right: 40px;
+		min-height: 600px;
 
 		.game-row {
 			margin-top: -120px;
