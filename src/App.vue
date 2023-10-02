@@ -4,11 +4,18 @@
 			<a-layout-header class="header">纸牌游戏</a-layout-header>
 			<a-layout>
 				<a-layout-content class="content">
-					<PokerComponent />
+					<PokerComponent ref="pokerRef" />
 				</a-layout-content>
 				<a-layout-sider class="sider">
 					<h2 class="operations">操作组</h2>
-					<a-button class="button" type="primary" block>透视</a-button>
+					<a-button
+						class="button"
+						type="primary"
+						block
+						@click="handlePerspective"
+					>
+						透视
+					</a-button>
 					<a-button class="button" type="primary" block>洗牌</a-button>
 				</a-layout-sider>
 			</a-layout>
@@ -17,7 +24,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import PokerComponent from './components/index.vue';
+
+const pokerRef = ref();
+const handlePerspective = () => {
+	pokerRef.value?.onPerspective();
+};
 </script>
 
 <style scoped lang="less">

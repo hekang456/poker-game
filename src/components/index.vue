@@ -35,6 +35,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { notification } from 'ant-design-vue';
 
 import poker from './poker';
 import { getAssetsFile } from '../utils/index';
@@ -78,8 +79,6 @@ for (let col = 0; col < DEFAULT_COLS; col++) {
 }
 
 viewPokersData.value = res;
-
-console.log(viewPokersData.value);
 
 const restCols = ref<Poker[]>([]);
 const onDragstart = async (_event: DragEvent, element: Poker) => {
@@ -165,7 +164,52 @@ const overturn = (element: Poker) => {
 	) {
 		element.visible = true;
 	}
+
+	// 如果透视功能开启，那也可以翻牌
+	if (perspective.value) {
+		if (element.visible === false) {
+			element.visible = true;
+
+			setTimeout(() => {
+				element.visible = false;
+			}, 1500);
+		}
+	}
 };
+
+// 透视
+const perspective = ref(false);
+const onPerspective = () => {
+	let time = 5;
+
+	perspective.value = true;
+	notification.open({
+		key: 'perspective',
+		message: '透视',
+		description: `透视功能将会在${time}秒后关闭`
+	});
+	const repetition = () => {
+		time--;
+		if (time > 0) {
+			setTimeout(() => {
+				notification.open({
+					key: 'perspective',
+					message: '透视',
+					description: `透视功能将会在${time}秒后关闭`
+				});
+
+				repetition();
+			}, 1000);
+		} else {
+			perspective.value = false;
+		}
+	};
+	repetition();
+};
+
+defineExpose({
+	onPerspective
+});
 </script>
 
 <style scoped lang="less">
