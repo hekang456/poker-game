@@ -16,7 +16,33 @@
 					>
 						透视
 					</a-button>
-					<a-button class="button" type="primary" block>洗牌</a-button>
+					<a-button
+						class="button"
+						type="primary"
+						block
+						@click="handleResetGame"
+					>
+						洗牌
+					</a-button>
+					<a-button
+						class="button"
+						type="primary"
+						block
+						@click="handleSetHistoryFile"
+					>
+						存档
+					</a-button>
+					<a-button
+						class="button"
+						type="primary"
+						block
+						@click="handleGetHistoryFile"
+					>
+						读档
+					</a-button>
+					<a-button class="button" type="primary" block @click="handleHint">
+						提示一步
+					</a-button>
 				</a-layout-sider>
 			</a-layout>
 		</a-layout>
@@ -30,6 +56,20 @@ import PokerComponent from './components/index.vue';
 const pokerRef = ref();
 const handlePerspective = () => {
 	pokerRef.value?.onPerspective();
+};
+
+const handleHint = () => {
+	pokerRef.value?.onHint();
+};
+
+const handleResetGame = () => {
+	pokerRef.value?.resetGame();
+};
+const handleSetHistoryFile = () => {
+	pokerRef.value?.setHistoryFile();
+};
+const handleGetHistoryFile = () => {
+	pokerRef.value?.getHistoryFile();
 };
 </script>
 
@@ -47,16 +87,15 @@ const handlePerspective = () => {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: calc(100vh - 64px);
+	min-height: calc(100vh - 64px);
 }
 
 .sider {
 	background-color: blanchedalmond;
 	display: flex;
 	flex-direction: column;
-	align-self: center;
 	width: 100%;
-	height: calc(100vh - 64px);
+	min-height: calc(100vh - 64px);
 	padding: 16px;
 
 	.operations {

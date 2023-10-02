@@ -35,11 +35,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { notification } from 'ant-design-vue';
+import { Modal, message, notification } from 'ant-design-vue';
 
 import poker from './poker';
-import { getAssetsFile } from '../utils/index';
+import { getAssetsFile, getSuit } from '../utils/index';
 import { Poker } from './type';
+import { cloneDeep } from 'lodash-es';
 
 const DEFAULT_UNVISIBLE_ROWS = 2;
 const DEFAULT_COLS = 8;
@@ -58,27 +59,34 @@ const rearrange = () => {
 	});
 };
 
-let index = 0;
-const res = [];
-
 // 按照列来填充
-for (let col = 0; col < DEFAULT_COLS; col++) {
-	const curCol: Poker[] = [];
-	for (let row = 0; row < DEFAULT_UNVISIBLE_ROWS + DEFAULT_COLS - col; row++) {
-		curCol.push({
-			id: new Date().getTime(),
-			suit: data[index].suit,
-			value: data[index].value,
-			row,
-			col,
-			visible: row < 2 ? false : true
-		});
-		index++;
+const initData = () => {
+	let index = 0;
+	const res = [];
+	for (let col = 0; col < DEFAULT_COLS; col++) {
+		const curCol: Poker[] = [];
+		for (
+			let row = 0;
+			row < DEFAULT_UNVISIBLE_ROWS + DEFAULT_COLS - col;
+			row++
+		) {
+			curCol.push({
+				id: new Date().getTime(),
+				suit: data[index].suit,
+				value: data[index].value,
+				row,
+				col,
+				visible: row < 2 ? false : true
+			});
+			index++;
+		}
+		res.push(curCol);
 	}
-	res.push(curCol);
-}
 
-viewPokersData.value = res;
+	viewPokersData.value = res;
+};
+
+initData();
 
 const restCols = ref<Poker[]>([]);
 const onDragstart = async (_event: DragEvent, element: Poker) => {
@@ -207,8 +215,90 @@ const onPerspective = () => {
 	repetition();
 };
 
+const onHint = () => {
+	let flag = false;
+	work: for (let i = 0; i < DEFAULT_COLS; i++) {
+		const lastEle = viewPokersData.value[i][viewPokersData.value[i].length - 1];
+		const { suit: lastSuit, value: lastValue, col: lastCol } = lastEle;
+
+		for (let col = 0; col < viewPokersData.value.length; col++) {
+			const colData = viewPokersData.value[col];
+
+			for (let j = 0; j < colData.length; j++) {
+				const item = colData[j];
+				const {
+					suit: curSuit,
+					value: curValue,
+					col: curCol,
+					visible: curVisible
+				} = item;
+
+				if (lastCol !== curCol) {
+					if (
+						curVisible &&
+						lastSuit === curSuit &&
+						lastValue === curValue + 1
+					) {
+						flag = true;
+						message.success(
+							`${lastCol! + 1}列的${getSuit(
+								lastSuit
+							)}${lastValue}可以配对, 目标在第${curCol! + 1}列`
+						);
+						break work;
+					}
+				}
+			}
+		}
+	}
+	if (!flag) {
+		message.warning('没有可以配对的牌了');
+	}
+};
+
+const setHistoryFile = () => {
+	Modal.confirm({
+		title: '确认存档',
+		content: '存档会导致上次存档数据丢失，是否确认？',
+		onOk() {
+			window.localStorage.setItem(
+				'__poker_game_history',
+				JSON.stringify(cloneDeep(viewPokersData.value))
+			);
+		},
+		onCancel() {
+			console.log('Cancel');
+		}
+	});
+};
+
+const getHistoryFile = () => {
+	const history = window.localStorage.getItem('__poker_game_history');
+	if (!history) message.info('没有可读档的文件');
+
+	Modal.confirm({
+		title: '确认读档',
+		content: '读档会导致当前进度丢失，是否确认？',
+		onOk() {
+			viewPokersData.value = JSON.parse(history!);
+		},
+		onCancel() {
+			console.log('Cancel');
+		}
+	});
+};
+
+const resetGame = () => {
+	poker.shuffle();
+	initData();
+};
+
 defineExpose({
-	onPerspective
+	onPerspective,
+	onHint,
+	setHistoryFile,
+	getHistoryFile,
+	resetGame
 });
 </script>
 
@@ -219,6 +309,7 @@ defineExpose({
 
 	.game-col {
 		width: 120px;
+		padding-top: 80px;
 		display: inline-flex;
 		flex-direction: column;
 		margin-right: 40px;
