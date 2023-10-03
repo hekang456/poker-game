@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Modal, message, notification } from 'ant-design-vue';
+import { useRefHistory } from '@vueuse/core';
 
 import poker from './poker';
 import { getAssetsFile, getSuit } from '../utils/index';
@@ -342,12 +343,25 @@ const resetGame = () => {
 	initData();
 };
 
+const { undo, redo } = useRefHistory(viewPokersData, {
+	deep: true
+});
+const onUndo = () => {
+	undo();
+};
+
+const onRedo = () => {
+	redo();
+};
+
 defineExpose({
 	onPerspective,
 	onHint,
 	setHistoryFile,
 	getHistoryFile,
-	resetGame
+	resetGame,
+	onUndo,
+	onRedo
 });
 </script>
 

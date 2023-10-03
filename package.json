@@ -9,6 +9,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@vueuse/core": "^10.4.1",
 		"ant-design-vue": "4.x",
 		"html2canvas": "^1.4.1",
 		"less": "^4.2.0",

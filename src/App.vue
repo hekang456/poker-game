@@ -43,6 +43,12 @@
 					<a-button class="button" type="primary" block @click="handleHint">
 						提示一步
 					</a-button>
+					<a-button class="button" type="primary" block @click="handleUndo">
+						撤销一步
+					</a-button>
+					<a-button class="button" type="primary" block @click="handleRedo">
+						重做一步
+					</a-button>
 				</a-layout-sider>
 			</a-layout>
 		</a-layout>
@@ -70,6 +76,12 @@ const handleSetHistoryFile = () => {
 };
 const handleGetHistoryFile = () => {
 	pokerRef.value?.getHistoryFile();
+};
+const handleUndo = () => {
+	pokerRef.value?.onUndo();
+};
+const handleRedo = () => {
+	pokerRef.value?.onRedo();
 };
 </script>
 
