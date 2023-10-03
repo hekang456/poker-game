@@ -13,7 +13,8 @@
 					v-for="(element, indexR) in col"
 					:key="indexR"
 					:class="{
-						'choose-element': element.id === toBeMatchedCards?.[0]?.id
+						'choose-element': element.id === toBeMatchedCards?.[0]?.id,
+						'hint-element': hintElements.includes(element)
 					}"
 					:style="{ top: `${60 * indexR}px` }"
 					@click="overturnOrChoose(element)"
@@ -205,6 +206,9 @@ const onColDragover = (_event: DragEvent, indexCol: number) => {
 let toBeMatchedCards = ref<Poker[]>([]);
 
 const overturnOrChoose = (element: Poker) => {
+	// 可以去掉提示了
+	hintElements.value = [];
+
 	const { col, row } = element;
 
 	// 扣着的牌需要翻起来
@@ -281,6 +285,8 @@ const onPerspective = () => {
 	repetition();
 };
 
+let hintElements = ref<Poker[]>([]);
+
 const onHint = () => {
 	let flag = false;
 	work: for (let i = 0; i < DEFAULT_COLS; i++) {
@@ -320,6 +326,8 @@ const onHint = () => {
 								lastSuit
 							)}${lastValue}可以配对, 目标在第${curCol! + 1}列`
 						);
+						hintElements.value.push(lastEle, item);
+
 						break work;
 					}
 				}
@@ -414,6 +422,11 @@ defineExpose({
 		.choose-element {
 			transform: scale(1);
 			border: 2px solid salmon;
+		}
+
+		.hint-element {
+			transform: scale(1);
+			border: 2px solid greenyellow;
 		}
 
 		.placeholder {
