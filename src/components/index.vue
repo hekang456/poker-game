@@ -72,6 +72,25 @@ const rearrange = () => {
 	});
 };
 
+const checkDontHaveBug = (arr: Poker[][]) => {
+	for (let col = 0; col < DEFAULT_COLS; col++) {
+		for (let row = 0; row < DEFAULT_UNVISIBLE_ROWS; row++) {
+			const topEle = arr[col][row];
+			const bottomEle = arr[col][row + 1];
+
+			if (
+				topEle.suit === bottomEle.suit &&
+				topEle.value === bottomEle.value + 1
+			) {
+				console.log(topEle.col, topEle.row);
+
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
 // 按照列来填充
 const initData = () => {
 	let index = 0;
@@ -94,6 +113,12 @@ const initData = () => {
 			index++;
 		}
 		res.push(curCol);
+	}
+
+	if (!checkDontHaveBug(res)) {
+		poker.shuffle();
+		initData();
+		return;
 	}
 
 	viewPokersData.value = res;
