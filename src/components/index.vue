@@ -7,29 +7,42 @@
 			@drop="onDrop($event, indexC)"
 			@dragover="onColDragover($event, indexC)"
 		>
-			<div
-				class="game-row"
-				v-for="(element, indexR) in col"
-				:key="indexR"
-				:class="{ 'choose-element': element.id === toBeMatchedCards?.[0]?.id }"
-				@click="overturnOrChoose(element)"
-				:draggable="element.visible"
-				@dragstart="onDragstart($event, element)"
-				@dragover="onDragover($event, element, indexC)"
-			>
-				<a-image
-					v-if="element.visible"
-					:src="getAssetsFile(element.suit + element.value)"
-					:width="120"
-					:preview="false"
-				/>
-				<a-image
-					v-else
-					:src="getAssetsFile('back')"
-					:width="120"
-					:preview="false"
-				/>
-			</div>
+			<template v-if="col.length > 0">
+				<div
+					class="game-row"
+					v-for="(element, indexR) in col"
+					:key="indexR"
+					:class="{
+						'choose-element': element.id === toBeMatchedCards?.[0]?.id
+					}"
+					:style="{ top: `${60 * indexR}px` }"
+					@click="overturnOrChoose(element)"
+					:draggable="element.visible"
+					@dragstart="onDragstart($event, element)"
+					@dragover="onDragover($event, element, indexC)"
+				>
+					<a-image
+						v-if="element.visible"
+						:src="getAssetsFile(element.suit + element.value)"
+						:width="120"
+						:preview="false"
+					/>
+					<a-image
+						v-else
+						:src="getAssetsFile('back')"
+						:width="120"
+						:preview="false"
+					/>
+				</div>
+			</template>
+			<template v-else>
+				<div class="game-row placeholder" @click="onClickEmptyCol(indexC)">
+					<div class="tooltip">
+						<p>本列暂无</p>
+						<p>可放置</p>
+					</div>
+				</div>
+			</template>
 		</div>
 	</div>
 </template>
@@ -89,7 +102,7 @@ const initData = () => {
 initData();
 
 const restCols = ref<Poker[]>([]);
-const onDragstart = async (_event: DragEvent, element: Poker) => {
+const onDragstart = (_event: DragEvent, element: Poker) => {
 	const { col, row } = element;
 	restCols.value = viewPokersData.value[col!].slice(row!);
 
@@ -122,6 +135,7 @@ const checkPokerIsMatched = (indexCol: number) => {
 	} = restCols.value[0];
 
 	const curColLength = viewPokersData.value[indexCol].length;
+
 	if (curColLength > 0) {
 		const lastPoker = viewPokersData.value[indexCol][curColLength - 1];
 		const { suit: endSuit, value: endValue } = lastPoker;
@@ -187,10 +201,21 @@ const overturnOrChoose = (element: Poker) => {
 			// message.info('已选择要移动的牌，请选择要移动的位置');
 			toBeMatchedCards.value.push(element);
 		} else if (toBeMatchedCards.value.length === 1) {
+			// TODO 如果目标列没有东西怎么办
 			toBeMatchedCards.value.push(element);
 			checkIfMatch(toBeMatchedCards.value[0], toBeMatchedCards.value[1]);
 			toBeMatchedCards.value = [];
 		}
+	}
+};
+
+const onClickEmptyCol = (indexCol: number) => {
+	if (toBeMatchedCards.value?.[0]) {
+		const { col, row } = toBeMatchedCards.value[0];
+		restCols.value = viewPokersData.value[col!].slice(row!);
+		checkPokerIsMatched(indexCol);
+
+		toBeMatchedCards.value = [];
 	}
 };
 
@@ -329,23 +354,38 @@ defineExpose({
 <style scoped lang="less">
 .game-wrap {
 	height: 100%;
-	padding-top: 80px;
+	padding-top: 40px;
 
 	.game-col {
 		width: 120px;
-		padding-top: 80px;
 		display: inline-flex;
 		flex-direction: column;
 		margin-right: 40px;
+		position: relative;
+		height: 20px; // 为了撑起这个格子
 
 		.game-row {
-			margin-top: -120px;
 			border-radius: 4px;
+			position: absolute;
+			left: 0;
+			top: 0;
+			transform: scale(0.9);
 		}
 
 		.choose-element {
-			border: 4px solid green;
-			padding: -8px;
+			transform: scale(1);
+			border: 2px solid salmon;
+		}
+
+		.placeholder {
+			width: 120px;
+			color: #7b7777;
+			min-height: 50vh;
+			border: 1px dotted #7b7777;
+			padding-top: 40px;
+			margin-top: -10px;
+			display: flex;
+			justify-content: center;
 		}
 	}
 }

@@ -87,7 +87,9 @@ const handleGetHistoryFile = () => {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	min-height: calc(100vh - 64px);
+	// min-height: calc(100vh - 64px);
+	min-height: 200vh;
+	overflow-y: scroll;
 }
 
 .sider {
@@ -95,8 +97,10 @@ const handleGetHistoryFile = () => {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	min-height: calc(100vh - 64px);
+	// min-height: calc(100vh - 64px);
 	padding: 16px;
+	min-height: 200vh;
+	overflow-y: scroll;
 
 	.operations {
 		font-size: 18px;
