@@ -130,6 +130,7 @@ initData();
 
 const restCols = ref<Poker[]>([]);
 const onDragstart = (_event: DragEvent, element: Poker) => {
+	hintElements.value = [];
 	const { col, row } = element;
 	restCols.value = viewPokersData.value[col!].slice(row!);
 
@@ -321,11 +322,11 @@ const onHint = () => {
 						lastValue === curValue + 1
 					) {
 						flag = true;
-						message.success(
-							`${lastCol! + 1}列的${getSuit(
-								lastSuit
-							)}${lastValue}可以配对, 目标在第${curCol! + 1}列`
-						);
+						// message.success(
+						// 	`${lastCol! + 1}列的${getSuit(
+						// 		lastSuit
+						// 	)}${lastValue}可以配对, 目标在第${curCol! + 1}列`
+						// );
 						hintElements.value.push(lastEle, item);
 
 						break work;
