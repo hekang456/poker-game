@@ -54,7 +54,7 @@ import { Modal, message, notification } from 'ant-design-vue';
 import { useRefHistory } from '@vueuse/core';
 
 import poker from './poker';
-import { getAssetsFile, getSuit } from '../utils/index';
+import { getAssetsFile } from '../utils/index';
 import { Poker } from './type';
 import { cloneDeep } from 'lodash-es';
 
