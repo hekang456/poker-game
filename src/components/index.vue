@@ -23,13 +23,13 @@
 					@dragover="onDragover($event, element, indexC)"
 				>
 					<a-image
-						v-if="element.visible"
+						v-show="element.visible"
 						:src="getAssetsFile(element.suit + element.value)"
 						:width="120"
 						:preview="false"
 					/>
 					<a-image
-						v-else
+						v-show="!element.visible"
 						:src="getAssetsFile('back')"
 						:width="120"
 						:preview="false"
