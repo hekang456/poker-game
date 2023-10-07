@@ -78,15 +78,21 @@ const checkDontHaveBug = (arr: Poker[][]) => {
 	for (let col = 0; col < DEFAULT_COLS; col++) {
 		for (let row = 0; row < DEFAULT_UNVISIBLE_ROWS; row++) {
 			const topEle = arr[col][row];
-			const bottomEle = arr[col][row + 1];
+			const midEle = arr[col][row + 1];
 
-			if (
-				topEle.suit === bottomEle.suit &&
-				topEle.value === bottomEle.value + 1
-			) {
-				console.log(topEle.col, topEle.row);
-
-				return false;
+			if (row === 0) {
+				const bottomEle = arr[col][row + 2];
+				if (
+					(topEle.suit === midEle.suit && topEle.value === midEle.value + 1) ||
+					(topEle.suit === bottomEle.suit &&
+						topEle.value === bottomEle.value + 1)
+				) {
+					return false;
+				}
+			} else if (row === 1) {
+				if (topEle.suit === midEle.suit && topEle.value === midEle.value + 1) {
+					return false;
+				}
 			}
 		}
 	}
