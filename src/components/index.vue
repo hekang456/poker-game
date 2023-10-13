@@ -57,7 +57,7 @@ import poker from './poker';
 
 import { getAssetsFile } from '../utils/index';
 import { Poker } from './type';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, divide } from 'lodash-es';
 
 const DEFAULT_UNVISIBLE_ROWS = 2;
 const DEFAULT_COLS = 8;
@@ -141,20 +141,24 @@ const onDragstart = (_event: DragEvent, element: Poker) => {
 	const { col, row } = element;
 	restCols.value = viewPokersData.value[col!].slice(row!);
 
-	// const canvas = document.createElement('canvas');
+	// const wrap = document.createElement('div');
+	// wrap.draggable = true;
+	// wrap.classList.add('game-col');
+	// wrap.style.position = 'fixed';
+	// wrap.style.top = '-1000px';
+	// wrap.style.left = '-1000px';
 
-	// const ctx = canvas.getContext('2d');
-
-	// restCols.value.forEach((item) => {
-	// const img = new Image(); // 创建一个<img>元素
-	// img.onload = function () {
-	// 	ctx!.drawImage(img, 0, 65, 120, 185); //绘制图片
-	// };
-	// img.src = getAssetsFile(item.suit + item.value); // 设置图片源地址
-	// 	ctx?.fillRect(0, 0, 20, 20);
+	// restCols.value.forEach((ele) => {
+	// 	const item = document.createElement('div');
+	// 	item.classList.add('game-row');
+	// 	const img = document.createElement('img');
+	// 	img.src = getAssetsFile(ele.suit + ele.value);
+	// 	wrap.appendChild(item);
 	// });
 
-	// _event.dataTransfer?.setDragImage(canvas, 0, 0);
+	// document.body.appendChild(wrap);
+
+	// _event.dataTransfer?.setDragImage(wrap, 0, 0);
 };
 
 const onDrop = (_event: DragEvent | undefined, indexCol: number) => {
